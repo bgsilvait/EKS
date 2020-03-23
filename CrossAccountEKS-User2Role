@@ -1,0 +1,76 @@
+AccountA(12345678) UserA wants access EKS CLuster in AccountB(87654321)
+AccountB(87654321) EKS Cluster <cluster-name> on region <region>
+UserA 
+
+AccountA:
+
+in UserA add policy sts:AssumeRole
+
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "STSASSUME",
+            "Effect": "Allow",
+            "Action": "sts:AssumeRole",
+            "Resource": "arn:aws:iam::AccountB:role/EKS-CROSSB"
+        }
+    ]
+}
+
+
+AccountB :
+
+TRUST="{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::AccountA:user/UserA\" }, \"Action\": \"sts:AssumeRole\" } ] }"
+aws iam create-role --role-name EKS-CROSSB --assume-role-policy-document "$TRUST" --output text --query 'Role.Arn'
+
+EDIT EKS-CROSSB role  and add a policy with this permissions:
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "EKSREADONLY",
+            "Effect": "Allow",
+            "Action": [
+                "eks:DescribeNodegroup",
+                "eks:DescribeUpdate",
+                "eks:DescribeCluster"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+
+#Add the created role in the aws-configmap
+
+ROLE="    - rolearn: arn:aws:iam::AccountB:role/EKS-CROSSB\n      username: EKS-CROSSB\n      groups:\n        - system:masters"
+
+kubectl get -n kube-system configmap/aws-auth -o yaml | awk "/mapRoles: \|/{print;print \"$ROLE\";next}1" > /tmp/aws-auth-patch.yml
+
+kubectl patch configmap/aws-auth -n kube-system --patch "$(cat /tmp/aws-auth-patch.yml)"
+
+AccountA: 
+
+#Become the ROle arn:aws:iam::AccountB:role/EKS-CROSSB1
+
+temp_role=$(aws sts assume-role \
+                    --role-arn "arn:aws:iam::AccountB:role/EKS-CROSSB" \
+                    --role-session-name "CrossAccountSession")
+
+
+export AWS_ACCESS_KEY_ID=$(echo $temp_role | jq -r .Credentials.AccessKeyId)
+export AWS_SECRET_ACCESS_KEY=$(echo $temp_role | jq -r .Credentials.SecretAccessKey)
+export AWS_SESSION_TOKEN=$(echo $temp_role | jq -r .Credentials.SessionToken)
+
+
+#Update kubeconfig as role arn:aws:iam::AccountB:role/EKS-CROSSB, with the role arn:aws:iam::AccountB:role/EKS-CROSSB
+aws eks update-kubeconfig --name <cluster-name> --region <region> --role-arn arn:aws:iam::AccountB:role/EKS-CROSSB
+
+#Back to previus user/role
+unset AWS_SESSION_TOKEN
+unset AWS_SECRET_ACCESS_KEY
+unset AWS_ACCESS_KEY_ID
+
+kubectl get nodes
