@@ -1,0 +1,29 @@
+Codebuild ROLE:
+
+add this policy:
+
+=======
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "EKSREADONLY",
+            "Effect": "Allow",
+            "Action": [
+                "eks:DescribeNodegroup",
+                "eks:DescribeUpdate",
+                "eks:DescribeCluster"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "STSASSUME",
+            "Effect": "Allow",
+            "Action": "sts:AssumeRole",
+            "Resource": "arn:aws:iam::987654321:role/EksCodeBuildkubectlRole"
+        }
+    ]
+}
+
+======
