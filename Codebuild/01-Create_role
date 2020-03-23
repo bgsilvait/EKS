@@ -1,0 +1,3 @@
+#in my example the CODEBUILD role is service-role/codebuild-BUILD222-service-role
+#TRUST="{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::987654321:role/service-role/codebuild-BUILD222-service-role\" }, \"Action\": \"sts:AssumeRole\" } ] }"
+#aws iam create-role --role-name EksCodeBuildkubectlRole --assume-role-policy-document "$TRUST" --output text --query 'Role.Arn'
