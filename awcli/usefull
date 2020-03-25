@@ -1,0 +1,20 @@
+#https://github.com/awslabs/awscli-aliases
+
+on MacOS/cred:
+
+aws configure list 
+
+      Name                    Value             Type    Location
+      ----                    -----             ----    --------
+   profile                <not set>             None    None
+access_key     ****************LW6A shared-credentials-file
+secret_key     ****************kMir shared-credentials-file
+    region                ********      config-file    ~/.aws/config
+  
+  aws whoami
+  
+   {
+    "UserId": "*************NR",
+    "Account": "12345678",
+    "Arn": "arn:aws:iam::12345678:user/user01"
+}
