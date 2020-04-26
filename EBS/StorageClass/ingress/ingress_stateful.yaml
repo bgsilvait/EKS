@@ -14,5 +14,5 @@ spec:
         paths:
           - path: /*
             backend:
-              serviceName: "service-compliance"
+              serviceName: "service-stateful"
               servicePort: 80
