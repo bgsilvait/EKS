@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: "ing-service-stateful"
+  namespace: "default"
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}'
+    
+  labels:
+    app: nginx
+spec:
+  rules:
+    - http:
+        paths:
+         - path: /*
+           backend:
+             serviceName: service-stateful
+             servicePort: 80
