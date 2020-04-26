@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: "ing-service-stateful"
+  name: "ingress"
   namespace: "default"
   annotations:
     kubernetes.io/ingress.class: alb
