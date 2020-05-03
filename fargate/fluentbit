@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: bgsfargate
+  name: bgsfargate
+  namespace: free
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bgsfargate
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: bgsfargate
+    spec:
+      serviceAccount: fluentbitds
+      serviceAccountName: fluentbitds
+      containers:
+      - image: nginx
+        name: nginx
+        volumeMounts:
+        - name: fluent-bit-config
+          mountPath: /fluent-bit/etc/
+        - name: var-log-nginx
+          mountPath: /var/log/nginx
+      - image: 906394416424.dkr.ecr.eu-west-1.amazonaws.com/aws-for-fluent-bit:latest
+        name: fluent-bit
+        volumeMounts:
+        - name: fluent-bit-config
+          mountPath: /fluent-bit/etc/
+        - name: var-log-nginx
+          mountPath: /var/log/nginx
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: CLUSTER_NAME
+          value: workshop
+      volumes:
+      - name: fluent-bit-config
+        configMap:
+          name: fluent-bit-config
+      - name: var-log-nginx
+        emptyDir: {}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit-config
+  namespace: free
+  labels:
+    k8s-app: fluent-bit
+data:
+  fluent-bit.conf: |
+    [SERVICE]
+        Flush         1
+        Log_Level     info
+        Daemon        off
+        Parsers_File  parsers.conf
+        HTTP_Server   On
+        HTTP_Listen   0.0.0.0
+        HTTP_Port     2020
+
+    @INCLUDE input-nginx-log.conf
+    @INCLUDE filter-modifier.conf
+    @INCLUDE output-cw.conf
+
+  input-nginx-log.conf: |
+    [INPUT]
+        Name              tail
+        Tag               *
+        Path              /var/log/nginx/*.log
+        Parser            nginx
+        DB                /var/log/nginx/flb_nginx_log.db
+        Mem_Buf_Limit     5MB
+        Skip_Long_Lines   On
+        Refresh_Interval  10
+
+  output-cw.conf: |
+    [OUTPUT]
+        Name cloudwatch
+        Match *
+        region eu-west-1
+        log_group_name /eks/${CLUSTER_NAME}/fargatelogs/
+        log_stream_prefix ${POD_NAME}-
+        auto_create_group true
+
+  filter-modifier.conf: |
+    [FILTER]
+        Name record_modifier
+        Match *
+        Record kube_pod ${POD_NAME}
+        Record kube_namespace ${POD_NAMESPACE}
+
+  parsers.conf: |
+    [PARSER]
+        Name   nginx
+        Format regex
+        Regex ^(?<remote>[^ ]*) (?<host>[^ ]*) (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^\"]*?)(?: +\S*)?)?" (?<code>[^ ]*) (?<size>[^ ]*)(?: "(?<referer>[^\"]*)" "(?<agent>[^\"]*)")?$
+        Time_Key time
+        Time_Format %d/%b/%Y:%H:%M:%S %z
