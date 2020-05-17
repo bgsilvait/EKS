@@ -5,7 +5,11 @@ metadata:
   namespace: producao
   annotations:
     kubernetes.io/ingress.class: alb
-    alb.ingress.kubernetes.io/scheme: internal
+    # For Internal/Private ALB
+    #alb.ingress.kubernetes.io/scheme: internal
+    # For External/Public ALB
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    # Fargate needs to use target-type: ip
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/security-groups: sg-xxxxxxx,sg-yyyyyy
   labels:
