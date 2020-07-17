@@ -1,0 +1,24 @@
+Get-Service *kub*
+
+Status   Name               DisplayName
+------   ----               -----------
+Running  kubelet            kubelet
+Running  kube-proxy         kube-proxy
+
+#Clip will get the output and keep in the "paste"
+ WMIC path win32_process get Caption,Processid,Commandline | clip
+ 
+ notepad => paste
+ 
+ 
+amazon-ssm-agent.exe        "C:\Program Files\Amazon\SSM\amazon-ssm-agent.exe"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     3888       
+
+EKS-WindowsServiceHost.exe  "C:\Program Files\Amazon\EKS\EKS-WindowsServiceHost.exe" kubelet "C:\Program Files\kubernetes\kubelet.exe" --cloud-provider=aws --kubeconfig="C:\ProgramData\kubernetes\kubeconfig" --hostname-override=ip-192-168-10-75.ec2.internal --v=1 --pod-infra-container-image="amazonaws.com/eks/pause-windows:latest" --resolv-conf="" --enable-debugging-handlers --image-pull-progress-deadline=20m --cgroups-per-qos=false --enforce-node-allocatable="" --network-plugin=cni --cni-bin-dir="C:\Program Files\Amazon\EKS\cni" --cni-conf-dir="C:\ProgramData\Amazon\EKS\cni\config" --config="C:\ProgramData\kubernetes\kubelet-config.json" --logtostderr=true --node-ip=192.168.10.75  1756       
+
+kubelet.exe                 "C:\Program Files\kubernetes\kubelet.exe" "--cloud-provider=aws" "--kubeconfig=C:\ProgramData\kubernetes\kubeconfig" "--hostname-override=ip-192-168-10-75.ec2.internal" "--v=1" "--pod-infra-container-image=amazonaws.com/eks/pause-windows:latest" "--resolv-conf=" "--enable-debugging-handlers" "--image-pull-progress-deadline=20m" "--cgroups-per-qos=false" "--enforce-node-allocatable=" "--network-plugin=cni" "--cni-bin-dir=C:\Program Files\Amazon\EKS\cni" "--cni-conf-dir=C:\ProgramData\Amazon\EKS\cni\config" "--config=C:\ProgramData\kubernetes\kubelet-config.json" "--logtostderr=true" "--node-ip=192.168.10.75"                                                 1884       
+
+conhost.exe                 \??\C:\Windows\system32\conhost.exe 0x4                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                2580       
+
+EKS-WindowsServiceHost.exe  "C:\Program Files\Amazon\EKS\EKS-WindowsServiceHost.exe" kube-proxy "C:\Program Files\kubernetes\kube-proxy.exe" --kubeconfig="C:\ProgramData\kubernetes\kubeconfig" --v=1 --proxy-mode=kernelspace --hostname-override="ip-192-168-10-75.ec2.internal" --cluster-cidr="192.168.0.0/16" --logtostderr=true                                                                                                                                                                                                                                                                                                                                                                             3828       
+
+kube-proxy.exe              "C:\Program Files\kubernetes\kube-proxy.exe" "--kubeconfig=C:\ProgramData\kubernetes\kubeconfig" "--v=1" "--proxy-mode=kernelspace" "--hostname-override=ip-192-168-10-75.ec2.internal" "--cluster-cidr=192.168.0.0/16" "--logtostderr=true"                                                                                                                                                                                                                                                                                                                                                                                                                                           1984       
