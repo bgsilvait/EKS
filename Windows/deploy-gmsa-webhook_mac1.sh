@@ -146,7 +146,7 @@ main() {
     # the TLS certificate might not have been generated yet if it's a dry run
     local TLS_CERTIFICATE
     if [ -r "$SERVER_CERT" ]; then
-        TLS_CERTIFICATE=$(cat "$SERVER_CERT" | base64 )
+        TLS_CERTIFICATE=$(cat "$SERVER_CERT" | base64 --break )
     elif $DRY_RUN; then
         TLS_CERTIFICATE='TBD'
     else
@@ -162,7 +162,7 @@ main() {
         effect: NoSchedule'
     fi
 
-    TLS_PRIVATE_KEY=$(cat "$SERVER_KEY" | base64 ) \
+    TLS_PRIVATE_KEY=$(cat "$SERVER_KEY" | base64 --break ) \
         TLS_CERTIFICATE="$TLS_CERTIFICATE" \
         CA_BUNDLE="$($KUBECTL config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.certificate-authority-data}')" \
         RBAC_ROLE_NAME="$NAMESPACE-$NAME-rbac-role" \
