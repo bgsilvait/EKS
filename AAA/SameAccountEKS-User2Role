@@ -1,0 +1,27 @@
+ User needs policy sts:AssumeRole
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "STSASSUME",
+            "Effect": "Allow",
+            "Action": "sts:AssumeRole",
+            "Resource": "arn:aws:iam::Account:role/EKSROLEACCESS"
+        }
+    ]
+}
+
+TRUST="{ \"Version\": \"2012-10-17\", \"Statement\": [ { \"Effect\": \"Allow\", \"Principal\": { \"AWS\": \"arn:aws:iam::Account:root\" }, \"Action\": \"sts:AssumeRole\" } ] }"
+aws iam create-role --role-name EKSROLEACCESS --assume-role-policy-document "$TRUST" --output text --query 'Role.Arn'
+
+
+
+ROLE="    - rolearn: arn:aws:iam::AccountB:role/EKSROLEACCESS\n      username: EKSROLEACCESS\n      groups:\n        - system:masters"
+
+kubectl get -n kube-system configmap/aws-auth -o yaml | awk "/mapRoles: \|/{print;print \"$ROLE\";next}1" > /tmp/aws-auth-patch.yml
+
+kubectl patch configmap/aws-auth -n kube-system --patch "$(cat /tmp/aws-auth-patch.yml)"
+
+
+aws eks  update-kubeconfig --name clustername --role-arn arn:aws:iam::Account:role/EKSROLEACCESS
